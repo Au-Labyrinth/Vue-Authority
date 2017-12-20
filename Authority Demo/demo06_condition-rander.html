@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>条件渲染</title>
+    <link rel="stylesheet" href="lib/common.css">
+    <script type="text/javascript" src="lib/vue.js"></script>
+</head>
+<body>
+    <h2>条件渲染</h2>
+    <h2 class="text-title">v-if</h2>
+    <div class="content-box">
+        <p>在字符串模板中，比如Handlebars，我们得像这样写一个条件块：</p>
+        <article>
+            {{#if ok}}<br>
+            &nbsp;&nbsp;&nbsp;《h1》yes《/h1》<br>
+            {{/if}}<br>
+        </article>
+        
+        <p>在 Vue 中，我们使用 v-if 指令实现同样的功能</p>
+        <article>《h1 v-if="ok"》Yes《/h1》</article>
+        <p>也可以用 v-else 添加一个“else 块”：</p>
+        <article>
+            《h1 v-if="ok"》Yes《/h1》<br>
+            《h1 v-else》No《/h1》
+        </article>
+    </div>
+
+    <h2 class="text-title">#在 《template》 元素上使用 v-if 条件渲染分组</h2>
+    <div class="content-box">
+        <p>因为 v-if 是一个指令，所以必须将它添加到一个元素上。但是如果想切换多个元素呢？此时可以把一个 《templat》 元素当做不可见的包裹元素，并在上面使用 v-if。最终的渲染结果将不包含 《template》 元素。</p>
+        《template v-if="ok"》<br>
+        &nbsp;&nbsp;&nbsp;《h1》Title《/h1》<br>
+        &nbsp;&nbsp;&nbsp;《p》Paragraph 1《/p》<br>
+        &nbsp;&nbsp;&nbsp;《p》Paragraph 2《/p》<br>
+        《/template》<br>
+
+        <h2 class="text-title">#v-else</h2>
+        <p>你可以使用 v-else 指令来表示 v-if 的“else 块”：</p>
+        《div v-if="Math.random() > 0.5"》<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now you see me<br>
+        《/div》<br>
+        《div v-else》<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Now you don't<br>
+        《/div》<br><br>
+        <span class="color-purple">v-else 元素必须紧跟在带 v-if 或者 v-else-if 的元素的后面，否则它将不会被识别。</span>
+    </div>
+    
+</body>
+</html>
