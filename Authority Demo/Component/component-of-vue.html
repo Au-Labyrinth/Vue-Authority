@@ -4,10 +4,68 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>组件</title>
-    <link rel="stylesheet" href="lib/common.css">
-    <script type="text/javascript" src="lib/vue.js"></script>
+    <link rel="stylesheet" href="../lib/common.css">
+    <script type="text/javascript" src="../lib/vue.js"></script>
 </head>
 <body>
-    
+    <h2 class="text-title">什么是组件?</h2>
+    <div class="content-box">
+        <p>组件 (Component) 是 Vue.js 最强大的功能之一。组件可以扩展 HTML 元素，封装可重用的代码。在较高层面上，组件是自定义元素，Vue.js 的编译器为它添加特殊功能。在有些情况下，组件也可以表现为用 <span class="color-warn">is</span> 特性进行了扩展的原生 HTML 元素。</p>
+        <p>所有的 Vue 组件同时也都是 Vue 的实例，所以可接受相同的选项对象 (除了一些根级特有的选项) 并提供相同的生命周期钩子。</p>
+    </div>
+
+    <h2 class="text-title">使用组件</h2>
+    <div class="content-box">
+        <p>#全局注册</p>
+        <p>我们已经知道，可以通过以下方式创建一个 Vue 实例：</p>
+        new Vue({<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;el: '#some-element',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 选项<br>
+        })
+
+        <p>要注册一个全局组件，可以使用 Vue.component(tagName, options)。例如：</p>
+        Vue.component('my-component', {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// 选项<br>
+          })
+
+        <p class="color-purple">请注意，对于自定义标签的命名 Vue.js 不强制遵循 W3C 规则 (小写，并且包含一个短杠)，尽管这被认为是最佳实践</p>
+
+        <p>组件在注册之后，便可以作为自定义元素 <span class="color-warn">《my-component》《/my-component》</span> 在一个实例的模板中使用。注意确保在初始化根实例之前注册组件：</p>
+        《div id="example"》<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;《my-component》《/my-component》<br>
+        《/div》<br><br>
+
+        // 注册<br>
+        Vue.component('my-component', {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;template: '《div》A custom component!《/div》' <br>
+        })<br><br>
+
+        // 创建根实例<br>
+        new Vue({<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;el: '#example'<br>
+        })
+
+        <p>渲染为：</p>
+        《div id="example"》<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;《div》A custom component!《/div》<br>
+        《/div》
+    </div>
+
+    <div class="content-box">
+        <p>#局部注册</p>
+        <p>你不必把每个组件都注册到全局。你可以通过某个 Vue 实例/组件的实例选项 components 注册仅在其作用域中可用的组件</p>
+
+        var Child = {
+            template: '<div>A custom component!</div>'
+          }
+          
+        new Vue({
+        // ...
+        components: {
+            // <my-component> 将只在父组件模板中可用
+            'my-component': Child
+        }
+        })
+    </div>
 </body>
 </html>
