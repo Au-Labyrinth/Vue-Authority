@@ -85,6 +85,32 @@
             position: absolute;
         }
 
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 238px;
+            margin-top: 10px;
+        }
+        .cell {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 25px;
+            height: 25px;
+            border: 1px solid #aaa;
+            margin-right: -1px;
+            margin-bottom: -1px;
+        }
+        .cell:nth-child(3n) {
+            margin-right: 0;
+        }
+        .cell:nth-child(27n) {
+            margin-bottom: 0;
+        }
+        .cell-move {
+            transition: transform 1s;
+        }
+
     </style>
     <script type="text/javascript" src="../lib/vue.js"></script>
 </head>
@@ -471,10 +497,91 @@
 
     <h2 class="text-title">FLIP 动画不仅可以实现单列过渡，多维网格也同样可以过渡：</h2>
     <div class="content-box">
-        <p>Lazy Sudoku</p>    
-        <p>Keep hitting the shuffle button until you win.</p>    
+        <div id="sudoku-demo">
+            <h3>Lazy Sudoku</p>    
+            <p>Keep hitting the shuffle button until you win.</p>    
+            
+            <button @click="shuffle">Shuffle</button>
+            <transition-group name="cell" tag="div" class="container">
+                <div v-for="cell in cells" :key="cell.id" class="cell">
+                    {{ cell.number }}
+                </div>
+            </transition-group>
+        </div>
     </div>
 
+    <h2 class="text-title">列表的交错过渡</h2>
+    <div class="content-box">
+        <p>通过data属性与javascript通信就可以实现列表的交错过渡：</p>
+
+        <div id="staggered-list-demo">
+            <input v-model="query">
+            <transition-group
+                name="staggered-fade"
+                tag="ul"
+                :css="false"
+                v-on:before-enter="beforeEnter"
+                v-on:enter="enter"
+                v-on:leave="leave"
+            >
+            <li
+                v-for="(item, index) in computedList"
+                :key="item.msg"
+                :data-index="index"
+            > {{ item.msg }} </li>
+            </transition-group>
+        </div>
+    </div>
+
+    <h2 class="text-title">可复用的过渡</h2>
+    <div class="content-box">
+        <p>过渡可以通过 Vue 的组件系统实现复用。要创建一个可复用过渡组件，你需要做的就是将 《transition》 或者 《transition-group》 作为根组件，然后将任何子组件放置在其中就可以了。</p>
+        <p>使用template的简单例子</p>
+        <p><img src="../img/transition-template.jpg" alt=""></p>
+        <p>函数组件更适合完成这个任务：</p>
+        <p><img src="../img/tempalte-task.jpg" alt=""></p>
+    </div>
+
+    <h2 class="text-title">动态过渡</h2>
+    <div class="content-box">
+        <p>在 Vue 中即使是过渡也是数据驱动的！动态过渡最基本的例子是通过 name 特性来绑定动态值。</p>
+
+        <p>
+           《transition :name="transitionName"》<br>
+               ...<br>
+           《/transition》
+        </p>
+
+        <p>当你想用 Vue 的过渡系统来定义的 CSS 过渡/动画 在不同过渡间切换会非常有用</p>
+
+        <p>所有的过渡特性都是动态绑定。它不仅是简单的特性，通过事件的钩子函数方法，可以在获取到相应上下文数据。这意味着，可以根据组件的状态通过 JavaScript 过渡设置不同的过渡效果。</p>
+
+        <div id="dynamic-fade-demo" class="demo">
+            Fade In: <input type="range" v-model="fadeInDuration" min="0" :max="maxFadeDuration">
+            Fade Out: <input type="range" v-model="fadeOutDuration" min="0" :max="maxFadeDuration">
+
+            <transition
+                v-bind:css="false"
+                v-on:before-enter="beforeEnter"
+                v-on:enter="beforeEnter"
+                v-on:leave="leave"
+            >
+                <p v-if="show">hello</p>
+            </transition>
+            <button
+                v-if="stop"
+                v-on:click="stop = false; show = false"
+            >
+                Start animating
+            </button>
+            <button
+                v-else
+                @click="stop = true"
+            >
+                Stop it!
+            </button>
+        </div>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.14.1/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"></script>
@@ -605,6 +712,118 @@
                 },
                 shuffle: function () {
                     this.items = _.shuffle(this.items)
+                }
+            }
+        })
+
+        var sudokuDemo = new Vue({
+            el: '#sudoku-demo',
+            data: {
+                cells: Array.apply(null, { length: 81 })
+                .map(function(_, index) {
+                    return {
+                        id: index,
+                        number: index % 9 + 1
+                    }
+                })
+            },
+            methods: {
+                shuffle: function () {
+                    this.cells = _.shuffle(this.cells)
+                }
+            }
+        })
+
+        var staggeredList = new Vue({
+            el: '#staggered-list-demo',
+            data: {
+                query: '',
+                list: [
+                    {msg: 'Bruce Lee'},
+                    {msg: 'Jackie Chan'},
+                    {msg: 'Chuck Norris'},
+                    {msg: 'Jet Li'},
+                    {msg: 'Kung Fury'},
+                ]
+            },
+            computed: {
+                computedList: function () {
+                    var vm = this
+                    return this.list.filter(function (item) {
+                        return item.msg.toLowerCase().indexOf(vm.query.toLowerCase()) !== -1  
+                    })
+                }
+            },
+            methods: {
+                beforeEnter: function (el) {
+                    el.style.opacity = 0
+                    el.style.height = 0
+                },
+                enter: function (el, done) {
+                    var delay = el.dataset.index * 150
+                    setTimeout(function () {
+                        Velocity(
+                            el,
+                            { opacity: 1, height: '1.6em' },
+                            { complete: done} 
+                        )
+                    }, delay)
+                },
+                leave: function (el, done) {
+                    var delay = el.dataset.index * 150
+                    setTimeout(function () {
+                        Velocity(
+                            el,
+                            { opacity: 0, height: 0 },
+                            { complete: done}
+                        )
+                    }, delay)
+                }
+            }
+        })
+
+        var dynamicFade = new Vue({
+            el: '#dynamic-fade-demo',
+            data: {
+                show: true,
+                fadeInDuration: 1000,
+                fadeOutDuration: 1000,
+                maxFadeDuration: 1500,
+                stop: true
+            },
+            mouted: function () {
+                this.show = false
+            },
+            
+            methods: {
+                beforeEnter: function (el) {
+                    el.style.opacity = 0
+                },
+                enter: function (el, done) {
+                    var vm = this
+                    Velocity(el,
+                        { opacity: 1 },
+                        {
+                            duration: this.fadeInDuration,
+                            complete: function () {
+                                done()
+                                if (!vm.stop) vm.show = false
+                            }
+                        }
+                    )
+                },
+                leave: function (el, done) {
+                    var vm = this
+                    Velocity(el,
+                        { opacity: 0 },
+                        {
+                            duration: this.fadeOutDuration,
+                            compelete: function () {
+                                done()
+                                vm.show = true
+                            }
+                        }
+                    )
                 }
             }
         })
