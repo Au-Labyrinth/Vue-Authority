@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>路由</title>
+    <link rel="stylesheet" href="../lib/common.css">
+    <script type="text/javascript" src="../lib/vue.js"></script>
+</head>
+<body>
+
+    <h2 class="text-title">官方路由</h2>
+    <div class="content-box">
+
+        <p>对于大多数单页面应用，都推荐使用官方支持的 vue-router 库。更多细节可以看 vue-router 文档。</p>
+
+        <p class="text-title">从零开始简单的路由</p>
+
+        <p>如果只需要非常简单的路由而不需要引入整个路由库，可以动态渲染一个页面级的组件像这样：</p>
+        
+        <p>
+            const NotFound = { template: '<p>Page not found</p>'}
+            const Home = { template: '<p>home page</p>'}
+            const About = { template: '<p>about page</p>'}
+
+            const routes = {
+                '/': Home,
+                '/about': About
+            }
+
+            new Vue({
+                el: '#app',
+                data: {
+                    ViewComponent () {
+                        return routes[this.currentRoute] || NotFound
+                    }
+                },
+                render (h) { return h(this.ViewCompoent) }
+            })
+
+        </p>
+
+        <p>结合 HTML5 History API，你可以建立一个非常基本但功能齐全的客户端路由器。可以直接看实例应用</p>
+
+        <p class="text-title">整合第三方路由</p>
+
+        <p>如果有非常喜欢的第三方路由，如 Page.js 或者 Director，整合很简单。这有个用了 Page.js 的复杂示例。</p>
+
+    </div>
+</body>
+</html>
