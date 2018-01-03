@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>API</title>
+    <link rel="stylesheet" href="../lib/common.css">
+    <script type="text/javascript" src="../lib/vue.js"></script>
+</head>
+<body>
+    <h2 class="text-title">全局配置</h2>
+    <div class="content-box">
+        <p>Vue.config 是一个对象，包含Vue的全局配置。可以在启动应用之前修改下列属性：</p>
+
+        <p>#silent</p>
+        <ul>
+            <li>类型：boolean</li>
+            <li>默认值：false</li>
+            <li>
+                用法：<br>
+                Vue.config.silent = true<br>
+                取消Vue所有的日志与警告。
+            </li>
+            <li>Source</li>
+        </ul>
+
+        <p>#optionMergeStrategies</p>
+        <ul>
+            <li>类型：{ [key:string]: Function }</li>
+            <li>默认值: {}</li>
+            <li>
+                用法:<br>
+                Vue.config.optionMergeStrategies._my_option = function (parent,child,vm) {
+                    return child + 1
+                }
+
+                const Profile = Vue.extend({
+                    _my_option: 1
+                })
+
+                Profile.options._my_option = 2
+
+                自定义合并策略选项
+
+                合并策略选项分别接受第一个参数作为父实例，第二个参数为子实例，Vue实例上下文被作为第三个参数传入。
+
+            </li>
+        </ul>
+
+        <p>#devtools</p>
+        <ul>
+            <li>类型： boolean</li>
+            <li>默认值：true(生产版为 false)</li>
+            <li>
+                用法：
+                    务必在加载Vue之后，立即同步设置一下内容
+                    Vue.config.detools = true
+                配置是否允许vue-devtools检查代码。开发版本默认true，生产版本默认为false。生产版本设为true可以启用检查
+            </li>
+        </ul>
+
+        <p>#errirHandler</p>
+        <ul>
+            <li>类型：Function</li>
+            <li>默认值：默认抛出错误</li>
+            <li>
+                用法：
+                    Vue.config.errorHandler = function (err,vm) {
+                        //handle error
+                    }
+                
+                指定组件的渲染和观察期间未捕获错误的处理函数。这个处理函数被调用时，可以获取错误信息和Vue实例。
+            </li>
+        </ul>
+
+        <p>#warnHandler</p>
+        <ul>
+            <li>2.4.0新增</li>
+            <li>类型：Function</li>
+            <li>默认值：undefined</li>
+            <li>
+                用法：
+                    Vue.config.warnHandler = function (msg, vm, trace) {
+                        trace是组件的继承关系追踪
+                    }
+
+                为Vue运行时警告赋予一个自定义句柄。注意这只会在开发者环境下生效，在生产环境下它会被忽略
+            </li>
+        </ul>
+
+        <p>#ignoredElements</p>
+        <ul>
+            <li>类型：Array<string></li>
+            <li>默认值：[]</li>
+            <li>
+                用法：
+                    Vue.config.ingoreElements = [
+                        'my-custom-web-component',
+                         'another-web-compoent'
+                         用一个 'RegExp' 忽略所有"ion-"开头的元素
+                         仅在 2.5+支持
+
+                         /^ion-/
+                    ]
+
+                须使Vue忽略在Vue之外的自定义元素(e.g.使用了Web Component APIs)。否则，它会假设你忘记注册全局组件或者拼错了组件名称，从而抛出一个关于
+                Unknown cutom element 的警告.
+            </li>
+        </ul>
+
+        <p>#KeyCodes</p>
+        <ul>
+            <li>类型：{ [Key: string]: number | Array<number>}</li>
+            <li>默认值: {}</li>
+            <li>
+                用法：
+                    Vue.config.keyCodes = {
+                        v: 86,
+                        f1: 112,
+                        camelCase不可用
+                        mediaPlayPause： 179，
+                        取而代之的使 kebab-case 且用双引号括起来
+                        "media-play-pause": 179,
+                        up: [38,87]
+                    }
+
+                <input type="text" @keyup.media-play-pause="method">
+
+                给 v-on 自定义键位别名
+            </li>
+        </ul>
+
+        <p>#performance</p>
+        <ul>
+            <li>类型：boolean</li>
+            <li>默认值：false(自2.2.3起)</li>
+            <li>
+                用法：
+                    设置为 true 以在浏览器开发工具中启用对组件初始化、编译、渲染和打补丁的性能追踪。只适用于开发模式和支持 performance.mark API 的浏览器上。
+            </li>
+        </ul>
+
+        <p>#productionTip</p>
+        <ul>
+            <li>2.2.0新增</li>
+            <li>类型：boolean</li>
+            <li>默认值：true</li>
+            <li>
+                用法：
+                    设置为 false 以阻止vue在启动时生成生产提示
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">全局API</h2>
+    <div class="content-box">
+        <p>#Vue.extend(options)</p>
+        <ul>
+            <li>
+                参数:
+                    {Object} options
+            </li>
+            <li>
+                用法：
+                    使用基础Vue构造器,创建一个“子类”。参数是一个包含组件选项的对象。
+                    data 选项是特例,需要注意-在 Vue.extend() 中它必须是函数
+
+                <div id="mount-point"></div>
+            </li>
+        </ul>
+
+        <p>#Vue.nextTick([callback,context])</p>
+        <ul>
+            <li>
+                参数:<br>
+                    {Function} [callback]
+                    {Object} [context]
+            </li>
+            <li>
+                用法：
+                    在下次DOM更新循环结束之后执行延迟回调。在修改数据之后立即使用这个方法，获取更新后的DOM。
+    
+                    修改数据
+                    vm.msg= 'Hello'
+    
+                    DOM 还没有更新
+                    Vue.nextTick(function() {
+                        //DOM更新了
+                    })
+    
+                    作为一个Promise 使用(2.1.0)起新增，详见接下来的提示
+                    Vue.nextTick()
+                        .then(function () {
+                            DOM更新了
+                    })
+    
+                    2.1.0 起新增：如果没有提供回调且在支持 Promise 的环境中，则返回一个 Promise。请注意 Vue 不自带 Promise 的 polyfill，所以如果你的目标浏览器不原生支持 Promise (IE：你们都看我干嘛)，你得自己提供 polyfill。
+            </li>
+        </ul>
+
+        <p>#Vue.set(target,key,value)</p>
+        <ul>
+            <li>
+                参数：
+                    {Object | Array} target
+                    {string | number} key
+                    {any} value
+            </li>
+            <li>返回值：设置的值。</li>
+            <li>
+                用法：
+                    设置对象的属性。如果对象是响应式的，确保属性被创建后也是响应式的，同时触发视图更新。这个方法主要用于避开 Vue 不能检测属性被添加的限制。
+            </li>
+            <li class="color-purple">注意对象不能是 Vue 实例，或者 Vue 实例的根数据对象。</li>
+        </ul>
+
+        <p>#Vue.delete(target,key)</p>
+        <ul>
+            <li>
+                参数：
+                    {Object | Array} target
+                    {string | number} key/index
+            </li>
+            <li>仅在 2.2.0+ 版本中支持 Array + index 用法。</li>
+            <li>
+                用法：
+                    删除对象的属性。如果对象是响应式的，确保删除能触发更新视图。这个方法主要用于避开 Vue 不能检测到属性被删除的限制，但是你应该很少会使用它。
+            </li>
+            <li>在 2.2.0+ 中同样支持在数组上工作。</li>
+            <li class=""color-purple>目标对象不能是一个 Vue 实例或 Vue 实例的根数据对象。</li>
+        </ul>
+
+        <p>#Vue.directive(id,[definition]</p>
+        <ul>
+            <li>
+                参数：
+                    {string} id
+                    {Function | Object} [definition]
+            </li>
+            <li>
+                用法:
+                    注册或获取全局指令
+
+            </li>
+            <li></li>
+        </ul>
+
+        <p>#Vue.filter(id,[definition])</p>
+        <ul>
+            <li>
+                参数:
+                    {string} id
+                    {Function} [definition]
+            </li>
+            <li>
+                用法：
+                    注册或获取全局过滤器
+
+                    注册
+                    Vue.filter('my-filter', function (value) {
+                        //返回处理后的值
+                    })
+
+                    getter 返回已注册的过滤器
+                    var myFilter = Vue.filter('my-filter')
+            </li>
+        </ul>
+
+        <p>#Vue.component(id,[definition])</p>
+        <ul>
+            <li>
+                参数：
+                    {string} id
+                    {Function | Object} [definition]
+            </li>
+            <li>
+                用法：
+                    注册或获取全局组件。注册还会自动使用给定的id设置组件的名称
+
+                    注册组件,传入一个扩展过的构造器
+                    Vue.component('my-component', Vue.extend({...}))
+
+                    注册组件，传入一个选项对象(自动调用 Vue.extend)
+                    Vue.component('my-component', {...})
+
+                    获取注册的组件 （始终返回构造器）
+                    var MyComponent = Vue.component('my-component')
+            </li>
+        </ul>
+
+        <p>#Vue.use(plugin)</p>
+        <ul>
+            <li>
+                参数:
+                    {Object | Function} plugin
+            </li>
+            <li>
+                用法：
+                安装 Vue.js 插件。如果插件是一个对象，必须提供 install 方法。如果插件是一个函数，它会被作为 install 方法。install 方法将被作为 Vue 的参数调用。
+
+                当install方法被同一个插件多次调用，插件将只会被安装一次
+            </li>
+        </ul>
+        
+        <p>#Vue.mixin(mixin)</p>
+        <ul>
+            <li>
+                参数:
+                    {Object} mixin
+            </li>
+            <li>
+                用法：
+                    全局注册一个混合，影响注册之后所有创建的每个 Vue 实例。插件作者可以使用混合，向组件注入自定义的行为。不推荐在应用代码中使用。
+            </li>
+        </ul>
+        
+        <p>#Vue.compile(template)</p>
+        <ul>
+            <li>
+                参数:
+                    {string} template
+            </li>
+            <li>
+                用法：
+                    在render函数中编译模板字符串。只在独立构建时有效
+
+                    var res = Vue.compile('<div><span>{{ msg }}</span></div>');
+
+                    new Vue({
+                        data: {
+                            msg: 'hello'
+                        },
+                        render: res.render,
+                        staticRenderFns: res.staticRenderFns
+                    })
+            </li>
+        </ul>
+
+        <p>#Vue.version</p>
+        <ul>
+            <li>
+                细节:
+                    提供字符串形式的 Vue 安装版本号。这对社区的插件和组件来说非常有用，你可以根据不同的版本号采取不同的策略。
+            </li>
+            <li>
+                用法：
+                    var version = Number(Vue.version.split('.')[0])
+
+                    if (version === 2) {
+                        Vue v2.x.x
+                    } else if (version === 1) {
+                        Vue v1.x.x
+                    } else {
+                        Unsupported versions of Vue
+                    }
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">选项/数据</h2>
+    <div class="content-box">
+        <p>#data</p>
+        <ul>
+            <li>
+                类型： Object | Function
+            </li>
+            <li>
+                限制: 组件的定义只接受function。
+            </li>
+            <li>
+                详细：
+                    Vue 实例的数据对象。Vue 将会递归将 data 的属性转换为 getter/setter，从而让 data 的属性能够响应数据变化。
+                    对象必须是纯粹的对象 (含有零个或多个的 key/value 对)：浏览器 API 创建的原生对象，原型上的属性会被忽略。
+                    大概来说，data 应该只能是数据 - 不推荐观察拥有状态行为的对象。
+
+                    一旦观察过，不需要再次在数据对象上添加响应式属性。因此推荐在创建实例之前，就声明所有的根级响应式属性。
+                    
+                    实例创建之后，可以通过 vm.$data 访问原始数据对象。Vue 实例也代理了 data 对象上所有的属性，因此访问 vm.a 等价于访问 vm.$data.a。
+                    
+                    以 _ 或 $ 开头的属性 不会 被 Vue 实例】代理，因为它们可能和 Vue 内置的属性、API 方法冲突。
+                    你可以使用例如 vm.$data._property 的方式访问这些属性。
+                    
+                    当一个组件被定义，data 必须声明为返回一个初始数据对象的函数，因为组件可能被用来创建多个实例。如果 data 仍然是一个纯粹的对象，
+                    则所有的实例将共享引用同一个数据对象！通过提供 data 函数，每次创建一个新实例后，我们能够调用 data 函数，
+                    从而返回初始数据的一个全新副本数据对象。
+                    
+                    如果需要，可以通过将 vm.$data 传入 JSON.parse(JSON.stringify(...)) 得到深拷贝的原始数据对象。
+
+                示例：
+                    var data = { a: 1 };
+
+                    // 直接创建一个实例
+                    var vm = new Vue({
+                        data: data
+                    })
+                    vm.a => 1
+                    vm.$data === data  =>true
+
+                    // Vue.extend() 中 data 必须是函数
+                    var Component = Vue.extend({
+                        data: function () {
+                            return { a: 1 }
+                        }
+                    })
+            </li>
+
+            <li class="color-purple">
+                注意，不应该对 data 属性使用箭头函数 (例如data: () => { return { a: this.myProp }})。理由是箭头函数绑定了父级作用域的上下文，所以 this 将不会按照期望指向 Vue 实例，this.myProp 将是 undefined。
+            </li>
+        </ul>
+
+        <p>#props</p>
+        <ul>
+            <li>类型：Array<string> | object</li>
+            <li>
+                详细：
+                    props可以是数组或对象，用于接收来自父组件的数据。props可以是简单的数组,或者使用对象作为代替、对象允许配置高级选项，
+                    如类型检测、自定义校验和设置默认值。
+            </li>
+            <li>
+                示例：
+                    // 简单语法
+                    Vue.component('props-demo-simple',{
+                        prpos: ['size', 'myMessage']
+                    })
+
+                    // 对象语法，提供校验
+                    Vue.component('props-demo-advanced', {
+                        props: {
+                            // 检测类型
+                            height: Number,
+                            // 检测类型 + 其他验证
+                            age: {
+                                type: Number,
+                                default: 0,
+                                required: true,
+                                validator: function (value) {
+                                    return value >= 0
+                                }
+                            }
+                        }
+                    })
+            </li>
+        </ul>
+
+        <p>#propsData</p>
+        <ul>
+            <li>
+                类型： { [key: string]: any }</li>
+            <li>
+                限制： 只用于new创建的实例中。
+            </li>
+            <li>
+                详细： 创建实例时传递props。主要作用时方便测试。
+            </li>
+            <li>
+                示例：
+                    var Comp = Vue.extend({
+                        props: ['msg'],
+                        template: '<div>{{ msg }}</div>'
+                    })
+
+                    var vm = new Comp({
+                        propsData: {
+                            msg: 'hello'
+                        }
+                    })
+            </li>
+        </ul>
+
+        <p>#computed</p>
+        <ul>
+            <li>
+                类型：{ [key: string]: Function | { get: Function, set: Function } }
+            </li>
+            <li>
+                详细：计算属性将被混入到Vue实例中。所有getter和setter的this上下文自动地绑定为Vue实例。
+            </li>
+            <li class="color-purple">
+                注意，不应该使用箭头函数来定义计算属性函数 (例如 aDouble: () => this.a * 2)。理由是箭头函数绑定了父级作用域的上下文，
+                所以 this 将不会按照期望指向 Vue 实例，this.a 将是 undefined。
+            </li>
+            <li>
+                计算属性的结果会被缓存，除非依赖的响应式属性变化才会重新计算。注意，如果实例范畴之外的依赖 (比如非响应式的 not reactive) 是不会触发计算属性更新的。
+            </li>
+            <li>
+                示例：
+                    var vm = new Vue({
+                        data: { a: 1 },
+                        computed: {
+                            // 仅读取
+                            aDouble: function () {
+                                return this.a * 2
+                            }
+                            // 读取和设置
+                            aPlus: {
+                                get:function () {
+                                    return this.a + 1
+                                },
+                                set:function () {
+                                    this.a = v - 1 
+                                }
+                            }
+                        }
+                    })
+                    vm.aPlus => 2
+                    vm.aPlus = 3
+                    vm.a 
+                    vm.aDouble =>4
+            </li>
+        </ul>
+
+        <p>#methods</p>
+        <ul>
+            <li>
+                类型：{ [key: string]: Function }
+            </li>
+            <li>
+                详细：
+                    methods将被混入到Vue示例中。可以直接通过VM实例访问这些方法，或者在指令表达式中使用。方法中的this自动绑定为Vue实例
+            </li>
+            <li class="color-purple">
+                注意，不应该使用箭头函数来定义 method 函数 (例如 plus: () => this.a++)。理由是箭头函数绑定了父级作用域的上下文，
+                所以 this 将不会按照期望指向 Vue 实例，this.a 将是 undefined。
+            </li>
+            <li>
+                示例：
+                    var vm = new Vue({
+                        data: { a: 1},
+                        methods: {
+                            plus: function() {
+                                this.a++
+                            }
+                        }
+                    })
+                    vm.plus()
+                    vm.a => 2
+            </li>
+        </ul>
+
+        <p>#watch</p>
+        <ul>
+            <li>
+                类型： { [key: string]: string | Function | Object }
+            </li>
+            <li>
+                详细:
+                    一个对象，键时需要观察的表达式，值是对应回调函数。值也可以式方法名，或者包含选项的对象。Vue示例将会在实例化时调用$watch(),
+                    遍历watch对象的每一个属性。
+            </li>
+            <li>
+                示例：
+                    var vm = new Vue({
+                        data: {
+                            a: 1,
+                            b: 2,
+                            c: 3,
+                            d: 4
+                        },
+                        watch: {
+                            a: function (val, oldVal) {
+                                console.log('new: %s, old: %s', val, oldVal)
+                            },
+                            // 方法名
+                            b: 'someMethod',
+                            // 深度 watcher
+                            c: {
+                                handler: function (val, oldVal) {/.../}
+                                deep: true
+                            },
+                            d: {
+                                handler: function (val, oldVal) {/.../}
+                                immediate: true
+                            }
+                        }
+                    })
+                    vm.a = 2 => new: 2, old: 1
+            </li>
+            <li class="color-purple">
+                注意，不应该使用箭头函数来定义 watcher 函数 (例如 searchQuery: newValue => this.updateAutocomplete(newValue))。理由是箭头函数绑定了父级作用域的上下文，所以 this 将不会按照期望指向 Vue 实例，this.updateAutocomplete 将是 undefined。
+            </li>
+        </ul>
+
+    </div>
+
+
+
+
+    <script type="text/javascript" charset="utf-8">
+        //创建构造器
+        var Profile = Vue.extend({
+            template: '<p>{{firstNsme}} {{lastName}} aka {{alias}}</p>',
+            data: function () {
+                return {
+                    firstName: 'Walter',
+                    lastName: 'White',
+                    alias: 'Heisenberg'
+                }
+            }
+        })
+        //创建Profile实例，并挂在到一个元素上。
+        new Profile().$mount('#mount-point')
+
+
+        //注册获取全局指令
+        //注册
+        Vue.directive('my-directive', {
+            bind: function () {},
+            inserted: function () {},
+            update: function () {},
+            componentUpdated: function () {},
+            unbind: function () {}
+        })
+
+        //注册(指令函数)
+        Vue.directive('my-directive', function () {
+            //这里将会被 bind 和 update 调用
+        })
+
+        //getter,返回已注册的指令
+        var myDirective = Vue.directive('my-directive')
+
+
+    </script>
+    
+</body>
+</html>
