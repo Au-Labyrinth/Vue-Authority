@@ -580,10 +580,1151 @@
                 注意，不应该使用箭头函数来定义 watcher 函数 (例如 searchQuery: newValue => this.updateAutocomplete(newValue))。理由是箭头函数绑定了父级作用域的上下文，所以 this 将不会按照期望指向 Vue 实例，this.updateAutocomplete 将是 undefined。
             </li>
         </ul>
-
     </div>
 
+    <h2 class="text-title">选项/DOM</h2>
+    <div class="content-box">
+        
+        <p>#el</p>
+        <ul>
+            <li>
+                类型： string | HTMLElement
+            </li>
+            <li>
+                限制： 只在由new创建的示例中遵守
+            </li>
+            <li>
+                详细：
+                    提供一个在页面上已存在的 DOM 元素作为 Vue 实例的挂载目标。可以是 CSS 选择器，也可以是一个 HTMLElement 实例。
 
+                    在实例挂载之后，元素可以用 vm.$el 访问。
+
+                    如果这个选项在实例化时有作用，实例将立即进入编译过程，否则，需要显式调用 vm.$mount() 手动开启编译。
+            </li>
+            <li class="color-purple">
+                    提供的元素只能作为挂载点。不同于 Vue 1.x，所有的挂载元素会被 Vue 生成的 DOM 替换。因此不推荐挂载 root 实例到 <html> 或者 <body> 上。
+            </li>
+            <li class="color-purple">
+                    如果 render 函数和 template 属性都不存在，挂载 DOM 元素的 HTML 会被提取出来用作模板，此时，必须使用 Runtime + Compiler 构建的 Vue 库。
+            </li>
+        </ul>
+
+        <p>#template</p>
+        <ul>
+            <li>
+                类型： string
+            </li>
+            <li>
+                详细：
+                一个字符串模板作为 Vue 实例的标识使用。模板将会 替换 挂载的元素。挂载元素的内容都将被忽略，除非模板的内容有分发插槽。
+
+                如果值以 # 开始，则它将被用作选择符，并使用匹配元素的 innerHTML 作为模板。常用的技巧是用 script type="x-template" 包含模板。
+            </li>
+            <li>
+                    出于安全考虑，你应该只使用你信任的 Vue 模板。避免使用其他人生成的内容作为你的模板。
+            </li>
+            <li>
+                    如果 Vue 选项中包含渲染函数，该模板将被忽略。
+            </li>
+        </ul>
+
+        <p>#render</p>
+        <ul>
+            <li>
+                类型： (createElement: () => VNode) => VNode
+            </li>
+            <li>
+                详细：
+
+                    字符串模板的代替方案，允许你发挥 JavaScript 最大的编程能力。该渲染函数接收一个 createElement 方法作为第一个参数用来创建 VNode。
+
+                    <span class="color-purple">
+                            如果组件是一个函数组件，渲染函数还会接收一个额外的 context 参数，为没有实例的函数组件提供上下文信息。
+                    </span>
+            </li>
+            <li class="color-purple">
+                Vue 选项中的 render 函数若存在，则 Vue 构造函数不会从 template 选项或通过 el 选项指定的挂载元素中提取出的 HTML 模板编译渲染函数。
+            </li>
+        </ul>
+
+        <p>#renderError</p>
+        <ul>
+            <li>2.2.0新增</li>
+            <li>
+                类型： (createElement: () => VNode, error: Error) => VNode
+            </li>
+            <li>
+                详细：
+                    只在开发者环境下工作。
+                    当 render 函数遭遇错误时，提供另外一种渲染输出。其错误将会作为第二个参数传递到 renderError。
+                    这个功能配合hot-reload非常实用。
+            </li>
+            <li>
+                示例：
+                    new Vue({
+                        render (h) {
+                            throw new Error('oops')
+                        },
+                        renderError (h, err) {
+                            return h('pre', {style: { color:'red'}}, err.stack)
+                        }
+                    }).$mount('#app')
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">选项/生命周期钩子</h2>
+    <div class="content-box">
+        <p class="color-purple">
+                所有的生命周期钩子自动绑定 this 上下文到实例中，因此你可以访问数据，对属性和方法进行运算。这意味着 你不能使用箭头函数来定义一个生命周期方法 
+                (例如 created: () => this.fetchTodos())。这是因为箭头函数绑定了父上下文，因此 this 与你期待的 Vue 实例不同，this.fetchTodos 的行为未定义。
+        </p>
+
+        <p>#beforeCreate</p>
+        <ul>
+            <li>
+                类型: Function
+            </li>
+            <li>
+                详细：
+                    在实例初始化之后，数据观测(data observer)和 event/wathcer事件配置之前被调用。
+            </li>
+            <li>
+                参考：生命周期图示
+            </li>
+        </ul>
+
+        <p>#created</p>
+        <ul>
+            <li>
+                类型： Function
+            </li>
+            <li>
+                详细： 
+                    在挂在开始之前被调用：相关的 render 函数首次被调用
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+            <li>
+                参考：生命周期图示
+            </li>
+        </ul>
+
+        <p>#mounted</p>
+        <ul>
+            <li>
+                类型: Function
+            </li>
+
+            <li>
+                详细：
+                    el 被新创建的 vm.$el 替换，并挂载到实例上去之后调用该钩子。如果 root 实例挂载了一个文档内元素，当 mounted 被调用时 vm.$el 也在文档内。
+                    注意 mounted 不会承诺所有的子组件也都一起被挂载。如果你希望等到整个视图都渲染完毕，可以用 vm.$nextTick 替换掉 mounted：
+
+                    mounted: function () {
+                        tihs.$nextTick(function () {
+                            Code that will run only after the entire viw has been rendered
+                        })
+                    }
+                    
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+        </ul>
+
+        <p>#beforeUpdate</p>
+        <ul>
+            <li>
+                类型： Function
+            </li>
+            <li>
+                详细： 
+                    数据更新时调用，发生在虚拟 DOM 重新渲染和打补丁之前。
+
+                    你可以在这个钩子中进一步地更改状态，这不会触发附加的重渲染过程。
+                    
+                    该钩子在服务器端渲染期间不被调用。
+            </li>
+        </ul>
+
+        <p>#updated</p>
+        <ul>
+            <li>
+                类型：Function
+            </li>
+            <li>
+                详细：
+                    由于数据更改导致的虚拟DOM从新渲染和打补丁，在这之后会调用该钩子
+
+                    当这个钩子被调用时，组件 DOM 已经更新，所以你现在可以执行依赖于 DOM 的操作。然而在大多数情况下，
+                    你应该避免在此期间更改状态。如果要相应状态改变，通常最好使用计算属性或 watcher 取而代之。
+
+                    注意 updated 不会承诺所有的子组件也都一起被重绘。如果你希望等到整个视图都重绘完毕，可以用 vm.$nextTick 替换掉 updated：
+
+                    updated: function () {
+                        this.$nexttick(function () {
+                            Code will run only after the entire view has been reloadered
+                        })
+                    }
+
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+        </ul>
+
+        <p>#activated</p>
+        <ul>
+            <li>
+                类型： Function
+            </li>
+            <li>
+                详细：
+                    keep-alive组件激活时调用。
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+        </ul>
+
+        <p>#deactivated</p>
+        <ul>
+            <li>
+                类型： Function
+            </li>
+            <li>
+                详细：
+                    keep-alive组件停用时调用。
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+        </ul>
+
+        <p>#beforeDestroyed</p>
+        <ul>
+            <li>
+                类型: Function
+            </li>
+            <li>
+                详细：
+                    Vue 实例销毁之前调用。在这异步，实例仍然完全可用。
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+        </ul>
+
+        <p>#destroyed</p>
+        <ul>
+            <li>
+                类型: Function
+            </li>
+            <li>
+                详细：
+                    Vue 实例销毁后调用。调用后，Vue 实例指示的所有东西都会解绑定，所有的事件监听器会被移除，所有的子实例也会被销毁。
+                    该钩子在服务器端渲染期间不被调用
+            </li>
+        </ul>
+
+        <p>#errorCaptured</p>
+        <ul>
+            <li>2.5.0+新增</li>
+            <li>
+                类型: (err: Error, vm: Component, info: string) => ?boolean
+            </li>
+            <li>
+                详细：
+                当捕获一个来自子孙组件的错误时被调用。此钩子会收到三个参数：错误对象、发生错误的组件实例以及一个包含错误来源信息的字符串。
+                此钩子可以返回 false 以阻止该错误继续向上传播。
+
+                你可以在此钩子中修改组件的状态。因此在模板或渲染函数中设置其它内容的短路条件非常重要，它可以防止当一个错误被捕获时该组件进入一个无限的渲染循环。
+            </li>
+        </ul>
+
+        <p>
+                错误传播规则
+
+                默认情况下，如果全局的 config.errorHandler 被定义，所有的错误仍会发送它，因此这些错误仍让会向单一的分析服务的地方进行汇报。
+                
+                如果一个组件的继承或父级从属链路中存在多个 errorCaptured 钩子，则它们将会被相同的错误逐个唤起。
+                
+                如果此 errorCaptured 钩子自身抛出了一个错误，则这个新错误和原本被捕获的错误都会发送给全局的 config.errorHandler。
+                
+                一个 errorCaptured 钩子能够返回 false 以阻止错误继续向上传播。本质上是说“这个错误已经被搞定了且应该被忽略”。它会阻止其它任何会被这个错误唤起的 errorCaptured 钩子和全局的 config.errorHandler。
+        </p>
+    </div>
+
+    <h2 class="text-title">选项/资源</h2>
+    <div class="content-box">
+        <p>#directives</p>
+        <ul>
+            <li>
+                类型：Object
+            </li>
+            <li>
+                详细：
+                     包含Vue实例可用指令的哈希表
+            </li>
+        </ul>
+
+        <p>filters</p>
+        <ul>
+            <li>
+                类型：Object
+            </li>
+            <li>
+                详细：
+                     包含Vue实例可用过滤器的哈希表
+            </li>
+        </ul>
+
+        <p>#components</p>
+        <ul>
+            <li>
+                类型：Object
+            </li>
+            <li>
+                详细：
+                     包含Vue实例可用指令的哈希表
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">选项/组合</h2>
+    <div class="content-box">
+        
+        <p>#parent</p>
+        <ul>
+            <li>
+                类型： Vue instance
+            </li>
+            <li>
+                详细：
+                    指定已创建的实例之父实例，在两者之间建立父子关系。子实例可以用 this.$parent 访问父实例，子实例被推入父实例的 $children 数组中。
+            </li>
+        </ul>
+
+        <p>#mixins</p>
+        <ul>
+            <li>
+                类型： Array Object
+            </li>
+            <li>
+                详细：
+                    mixins 选项接受一个混合对象的数组。这些混合实例对象可以像正常的实例对象一样包含选项，他们将在 Vue.extend() 里最终选择使用相同的选项合并逻辑合并。举例：如果你混合包含一个钩子而创建组件本身也有一个，两个函数将被调用。
+                    Mixin 钩子按照传入顺序依次调用，并在调用组件自身的钩子之前被调用。
+            </li>
+            <li>
+                示例：
+                    var mixin = {
+                        created: function () { console.log(1) }
+                    }
+                    var vm = new Vue({
+                        created: function () { console.log(2) },
+                        mixins: [mixin]
+                    })
+
+                    => 1
+                    => 2
+            </li>
+        </ul>
+
+        <p>#extends</p>
+        <ul>
+            <li>
+                类型：Object | Function
+            </li>
+            <li>
+                详细：
+                     允许声明扩展另一个组件(可以是一个简单的选项对象或构造函数)，而无需使用 Vue.extend。这主要是为了便于扩展单文件组件。
+
+                     这和 mixins 类似，区别在于，组件自身的选项会比要扩展的源组件具有更高的优先级。
+            </li>
+            <li>
+                示例：
+                     var CompA = { ... }
+
+                     没有调用 Vue.extend 时候继承CompA
+                     var CompB = {
+                         extend: CompA,
+                         ...
+                     }
+            </li>
+        </ul>
+
+        <p>#provide/inject</p>
+        <ul>
+            <li>2.2.0新增</li>
+            <li>
+                类型：
+                    provide: Object | () => Object
+                    inject: Array<string> | {key: string | Symbol | Object }
+            </li>
+            <li>
+                详细：
+                    provide 和 inject 主要为高阶插件/组件库提供用例。并不推荐直接用于应用程序代码中。
+            </li>
+            <li>
+                    这对选项需要一起使用，以允许一个祖先组件向其所有子孙后代注入一个依赖，不论组件层次有多深，
+                    并在起上下游关系成立的时间里始终生效。如果你熟悉 React，这与 React 的上下文特性很相似。
+
+                    provide 选项应该是一个对象或返回一个对象的函数。该对象包含可注入其子孙的属性。在该对象中你可以使用 ES2015 Symbols 作为 key，
+                    但是只在原生支持 Symbol 和 Reflect.ownKeys 的环境下可工作。
+
+                    inject 选项应该是一个字符串数组或一个对象，该对象的 key 代表了本地绑定的名称，value 为其 key (字符串或 Symbol) 以在可用的注入中搜索。
+
+                    提示：provide 和 inject 绑定并不是可响应的。这是刻意为之的。然而，如果你传入了一个可监听的对象，那么其对象的属性还是可响应的。
+            </li>
+            <li>
+                示例：
+                    var Provider = {
+                        provide: {
+                            foo: 'bar'
+                        },
+                    }
+
+                    var Child = {
+                        inject: ['foo'],
+                        created () {
+                            cconsole.log(this.foo)  => bar
+                        }
+                    }
+
+                    利用 ES2015 Symbols、函数 provide 和对象 inject：
+
+                    const s = Symbol()
+
+                    const Provider = {
+                        provide () {
+                            return {
+                                [s]: 'foo'
+                            }
+                        }
+                    }
+
+                    const Child = {
+                        inject: {s},
+                    }
+
+                    接下来 2 个例子只工作在 Vue 2.2.1 或更高版本。低于这个版本时，注入的值会在 props 和 data 初始化之后得到。
+
+                    使用一个注入的值作为一个属性的默认值：
+
+                    const Child = {
+                    inject: ['foo'],
+                    props: {
+                        bar: {
+                        default () {
+                            return this.foo
+                        }
+                        }
+                    }
+                    }
+                    使用一个注入的值作为数据入口：
+
+                    const Child = {
+                    inject: ['foo'],
+                    data () {
+                        return {
+                        bar: this.foo
+                        }
+                    }
+                    }
+                    在 2.5.0+ 的注入可以通过设置默认值使其变成可选项：
+
+                    const Child = {
+                    inject: {
+                        foo: { default: 'foo' }
+                    }
+                    }
+                    如果它需要从一个不同名字的属性注入，则使用 from 来表示其源属性：
+
+                    const Child = {
+                    inject: {
+                        foo: {
+                        from: 'bar',
+                        default: 'foo'
+                        }
+                    }
+                    }
+                    对于 prop 的默认值来说是类似的，你需要对非原始值使用一个工厂方法：
+
+                    const Child = {
+                    inject: {
+                        foo: {
+                        from: 'bar',
+                        default: () => [1, 2, 3]
+                        }
+                    }
+                    }
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">选项/其他</h2>
+    <div class="content-box">
+        <p>#name</p>
+        <ul>
+            <li>类型：string</li>
+            <li>限制：只有作为组件选项时起作用。</li>
+            <li>
+                详细：
+                    允许组件模板递归地调用自身。注意，组件在全局用 Vue.component() 注册时，全局 ID 自动作为组件的 name。
+                    指定 name 选项的另一个好处是便于调试。有名字的组件有更友好的警告信息。另外，当在有 vue-devtools，未命名组件将显示成
+                    [AnonymousComponent]，这很没有语义。通过提供 name 选项，可以获得更有语义信息的组件树。
+            </li>
+        </ul>
+
+        <p>#delimiters</p>
+        <ul>
+            <li>
+                类型： Array string
+            </li>
+            <li>
+                默认值： ["{{", "}}"]
+            </li>
+            <li>
+                限制：这个选项只在完整构建版本中的浏览器内编译时可用。
+            </li>
+            <li>
+                详细：改变纯文本插入分隔符
+            </li>
+            <li>
+                示例：
+                     new Vue({
+                         delimiters: ['${', '}']
+                     })
+
+                分隔符变成了 ES6 模板字符串的风格
+            </li>
+        </ul>
+
+        <p>#functional</p>
+        <ul>
+            <li>类型：boolean</li>
+            <li>
+                详细:使组件无状态 (没有 data ) 和无实例 (没有 this 上下文)。他们用一个简单的 render 函数返回虚拟节点使他们更容易渲染。
+            </li>
+        </ul>
+
+
+        <p>#model</p>
+        <ul>
+            <li>2.2.0新增</li>
+            <li>类型： {prop?: string, event?: string}</li>
+            <li>
+                详细:
+                    允许一个自定义组件在使用 v-model 时定制 prop 和 event。默认情况下，一个组件上的 v-model 会把 value 用作 prop 且把 input 用作 event，
+                    但是一些输入类型比如单选框和复选框按钮可能像使用 value prop 来达到不同的目的。使用 model 选项可以回避这些情况产生的冲突。
+            </li>
+            <li>
+                Example:
+
+                Vue.component('my-checkbox', {
+                    model: {
+                        prop: 'checked',
+                        event: 'change'
+                    },
+                    props: {
+                        // this allows using the `value` prop for a different purpose
+                        value: String,
+                        // use `checked` as the prop which take the place of `value`
+                        checked: {
+                        type: Number,
+                        default: 0
+                        }
+                    },
+                    // ...
+                })
+
+                <my-checkbox v-model="foo" value="some value"></my-checkbox>
+
+                上面的方法相当于：
+                <my-checkbox
+                    :checked="foo"
+                    @change="val => { foo = val }"
+                    value="some value">
+                </my-checkbox>
+            </li>
+        </ul>
+
+        <p>#inherutAttrs</p>
+        <ul>
+            <li>2.4.0新增</li>
+            <li>
+                类型：boolean
+            </li>
+            <li>
+                默认值：true
+            </li>
+            <li>
+                详细：
+                
+                默认情况下父作用域的不被认作 props 的特性绑定 (attribute bindings) 将会“回退”且作为普通的 HTML 特性应用在子组件的根元素上。
+                当撰写包裹一个目标元素或另一个组件的组件时，这可能不会总是符合预期行为。通过设置 inheritAttrs 到 false，这些默认行为将会被去掉。而通过 (同样是 2.4 新增的) 实例属性 $attrs 可以让这些特性生效，且可以通过 v-bind 显性的绑定到非根元素上。
+            </li>
+        </ul>
+
+        <p>#comments</p>
+        <ul>
+            <li>2.4.0新增</li>
+            <li>
+                类型：boolean
+            </li>
+            <li>
+                默认值：false
+            </li>
+            <li>
+                限制：这个选项只在完整构建版本中的浏览器内编译时可用。
+            </li>
+            <li>
+                详细：
+                    当设为true时，将会保留且渲染魔棒中的HTML注释。默认行为是舍弃它们。
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">实例属性</h2>
+    <div class="content-box">
+        <p>#vm.$data</p>
+        <ul>
+            <li>
+                类型：Object
+            </li>
+            <li>
+                详细：
+                     Vue实例观察的数据对象。Vue实例代理了对其data对象属性的访问。
+            </li>
+            <li>
+                参考：选项/数据-data
+            </li>
+        </ul>
+
+        <p>#vm.$props</p>
+        <ul>
+            <li>2.2.0新增</li>
+            <li>
+                类型：Object
+            </li>
+            <li>
+                当前组件接收到的 props 对象。Vue 实例代理了对其 props 对象属性的访问。
+            </li>
+        </ul>
+
+        <p>#vm.$el</p>
+        <ul>
+            <li>
+                类型：HTMLElement
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：Vue实例使用的根DOM元素
+            </li>
+        </ul>
+
+        <p>#vm.$options</p>
+        <ul>
+            <li>
+                类型：Object
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：用于当前 Vue 实例的初始化选项。需要在选项中包含自定义属性时会有用处：
+                new Vue({
+                    customOption: 'foo',
+                    created: function () {
+                        console.log(this.$options.customOption) => 'foo'
+                    }
+                })
+            </li>
+        </ul>
+
+        <p>#vm.$parent</p>
+        <ul>
+            <li>
+                类型：Vue instance
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                     父实例，如果当前实例有的话。
+            </li>
+        </ul>
+        
+        <p>#vm.$root</p>
+        <ul>
+            <li>
+                类型：Vue instance
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                    当前组件树的根 Vue 实例。如果当前实例没有父实例，此实例将会是其自己。
+            </li>
+        </ul>
+        
+        <p>#vm.$children</p>
+        <ul>
+            <li>
+                类型：Array<Vue instance>
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                    当前实例的直接子组件。需要注意 $children 并不保证顺序，也不是响应式的。
+                    如果你发现自己正在尝试使用 $children 来进行数据绑定，考虑使用一个数组配合 v-for 来生成子组件，并且使用 Array 作为真正的来源。
+            </li>
+        </ul>
+        
+        <p>#vm.$slots</p>
+        <ul>
+            <li>
+                类型：{ [name: string]: ?Array<VNode> }
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                    用来访问被插槽分发的内容。每个具名插槽 有其相应的属性 (例如：slot="foo" 中的内容将会在 vm.$slots.foo 中被找到)。
+                    default 属性包括了所有没有被包含在具名插槽中的节点。
+
+                    在使用渲染函数书写一个组件时，访问 vm.$slots 最有帮助。
+            </li>
+            <li>
+                示例:
+                    <blog-post>
+                        <h1 slot="header">
+                          About Me
+                        </h1>
+                      
+                        <p>Here's some page content, which will be included in vm.$slots.default, because it's not inside a named slot.</p>
+                      
+                        <p slot="footer">
+                          Copyright 2016 Evan You
+                        </p>
+                      
+                        <p>If I have some content down here, it will also be included in vm.$slots.default.</p>.
+                    </blog-post>
+
+                    Vue.component('blog-post', {
+                        render: function (createElement) {
+                            var header = this.$slots.header
+                            var body   = this.$slots.default
+                            var footer = this.$slots.footer
+                            return createElement('div', [
+                                createElement('header', header),
+                                createElement('main', body),
+                                createElement('footer', footer)
+                            ])
+                        }
+                    })
+            </li>
+        </ul>
+
+        <p>#vm.$scopedSlots</p>
+        <ul>
+            <li>2.1.0新增</li>
+            <li>
+                类型：{ [name: string]: props => VNode | Array<VNode> }
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                    用来访问作用域插槽。对于包括 默认 slot 在内的每一个插槽，该对象都包含一个返回相应 VNode 的函数。
+                    vm.$scopedSlots 在使用渲染函数开发一个组件时特别有用。
+            </li>
+        </ul>
+        
+        <p>#vm.$isServer</p>
+        <ul>
+            <li>
+                类型：boolean
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                    当前Vue示例是否运行于服务器
+            </li>
+        </ul>
+        
+        <p>#vm.$attrs</p>
+        <ul>
+            <li>
+                类型：{ [key: string]: string }
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                包含了父作用域中不作为 prop 被识别 (且获取) 的特性绑定 (class 和 style 除外)。当一个组件没有声明任何 prop 时，
+                这里会包含所有父作用域的绑定 (class 和 style 除外)，并且可以通过 v-bind="$attrs" 传入内部组件——在创建更高层次的组件时非常有用。
+            </li>
+        </ul>
+        
+        <p>#vm.$listeners</p>
+        <ul>
+            <li>
+                类型：{ [key: string]: Function | Array<Function> }
+            </li>
+            <li>
+                只读
+            </li>
+            <li>
+                详细：
+                    包含了父作用域中的 (不含 .native 修饰器的) v-on 事件监听器。它可以通过 v-on="$listeners" 传入内部组件——在创建更高层次的组件时非常有用。
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">实例方法/数据</h2>
+    <div class="content-box">
+        <p>#vm.$watch(expOrFn,callback,[options])</p>
+        <ul>
+            <li>
+                参数:
+                    {string | Function} expOrFn
+                    {Function | Object} callback
+                    {Object} [options]
+                        {boolean} deep
+                        {boolean} immediate
+            </li>
+            <li>
+                返回值：{Function} unwatch
+            </li>
+            <li>
+                用法：
+                    观察 Vue 实例变化的一个表达式或计算属性函数。回调函数得到的参数为新值和旧值。表达式只接受监督的键路径。
+                    对于更复杂的表达式，用一个函数取代。
+            </li>
+            <li class="color-purple"> 
+                    注意：在变异 (不是替换) 对象或数组时，旧值将与新值相同，因为它们的引用指向同一个对象/数组。Vue 不会保留变异之前值的副本。
+            </li>
+            <li>
+                    // 键路径
+                    vm.$watch('a.b.c', function (newVal, oldVal) {
+                      // 做点什么
+                    })
+                    
+                    // 函数
+                    vm.$watch(
+                      function () {
+                        return this.a + this.b
+                      },
+                      function (newVal, oldVal) {
+                        // 做点什么
+                      }
+                    )
+
+                    vm.$watch 返回一个取消观察函数，用来停止触发回调：
+
+                    var unwatch = vm.$wtch('a', cb)
+                    //之后取消观察
+                    unwatch();
+
+                    选项：deep
+
+                    为了发现对象内部值的变化，可以在选项参数中指定 deep: true 。注意监听数组的变动不需要这么做。
+
+                    vm.$watch('someObject', callback, {
+                        deep: true
+                    })
+                    vm.someObject.nestedValue = 123
+                    // callback is fired
+
+                    选项：immediate
+
+                    在选项参数中指定 immediate: true 将立即以表达式的当前值触发回调：
+
+                    vm.$watch('a', callback, {
+                         immediate: true
+                    })
+                    // 立即以 `a` 的当前值触发回调
+            </li>
+        </ul>
+
+        <p>#vm.$set(target,key,value)</p>
+        <ul>
+            <li>
+                参数:
+                    {Object | Array} target
+                    {string | number} key
+                    {any} value
+            </li>
+            <li>返回值：设置的值</li>
+            <li>
+                用法：这是全局 Vue.delete 的别名。
+            </li>
+        </ul>
+
+        <p>#vm.$delete(target,key)</p>
+        <ul>
+            <li>
+                参数:
+                    {Object | Array} target
+                    {string | number} key
+            </li>
+            <li>
+                用法：这是全局 Vue.delete 的别名。
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">实例方法/事件</h2>
+    <div class="content-box">
+        <p>#vm.$on(event,callback)</p>       
+        <ul>
+            <li>
+                参数：
+                    {string | Array<string>} event （数组只在2.2.0+中支持）
+                    {Function} callback
+            </li>
+            <li>
+                用法：
+                    监听当前实例上的自定义事件。事件可以由vm.$emit触发。回调函数会接收所有传入事件触发函数的额外参数。
+            </li>
+            <li>
+                示例：
+                    vm.$on('test', function (msg) {
+                        console.log(msg)
+                    })
+                    vm.$emit('test', 'hi')
+                    => 'hi'
+            </li>
+        </ul>
+        
+        <p>#vm.$once(event,callback)</p>       
+        <ul>
+            <li>
+                参数：
+                    {string} event
+                    {Function} callback
+            </li>
+            <li>
+                用法：
+                    监听一个自定义事件，但是只触发一次，在第一次触发之后移除监听器。
+            </li>
+            <li>
+                示例：
+                    vm.$on('test', function (msg) {
+                        console.log(msg)
+                    })
+                    vm.$emit('test', 'hi')
+                    => 'hi'
+            </li>
+        </ul>
+
+        <p>#vm.$off([event,callback])</p>       
+        <ul>
+            <li>
+                参数：
+                    {string | Array<string>} event （数组只在2.2.2+支持数组）
+                    {Function} callback
+            </li>
+            <li>
+                用法：
+                    
+                    移除自定义事件监听器
+
+                        如果没有提供参数，则移除所有的事件监听器；
+
+                        如果只提供了事件，则移除该事件所有的监听器；
+                        
+                        如果同时提供了事件与回调，则只移除这个回调的监听器。
+            </li>
+        </ul>
+        
+        <p>#vm.$emit(event,[...args])</p>
+        <ul>
+            <li>
+                参数:
+                     {string} event
+                     [...args]
+                触发当前实例上的事件。附加参数都会传给监听器回调
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">实例方法/生命周期</h2>
+    <div class="content-box">
+        <p>#vm.$mount([elementOrSelector])</p>
+        <ul>
+            <li>
+                参数：
+                    {Element | string} [elementOrSelector]
+                    {boolean} [hydrating]
+            </li>
+            <li>
+                返回值： vm 实例自身
+            </li>
+            <li>
+                用法：
+                    如果 Vue 实例在实例化时没有收到 el 选项，则它处于“未挂载”状态，没有关联的 DOM 元素。可以使用 vm.$mount() 手动地挂载一个未挂载的实例。
+
+                    如果没有提供 elementOrSelector 参数，模板将被渲染为文档之外的的元素，并且你必须使用原生 DOM API 把它插入文档中。
+                    
+                    这个方法返回实例自身，因而可以链式调用其它实例方法。
+            </li>
+            <li>
+                var MyComponent = Vue.extend({
+                    template: '<div>Hello!</div>'
+                    })
+                    
+                    // 创建并挂载到 #app (会替换 #app)
+                    new MyComponent().$mount('#app')
+                    
+                    // 同上
+                    new MyComponent({ el: '#app' })
+                    
+                    // 或者，在文档之外渲染并且随后挂载
+                    var component = new MyComponent().$mount()
+                    document.getElementById('app').appendChild(component.$el)
+            </li>
+        </ul>
+
+        <p>#vm.$nextTick([callback])</p>
+        <ul>
+            <li>
+                参数:
+                     {Function} [callback]
+            </li>
+            <li>
+                用法：
+                将回调延迟到下次 DOM 更新循环之后执行。在修改数据之后立即使用它，然后等待 DOM 更新。
+                它跟全局方法 Vue.nextTick 一样，不同的是回调的 this 自动绑定到调用它的实例上。
+            </li>
+            <li class="color-purple">
+                    2.1.0 起新增：如果没有提供回调且在支持 Promise 的环境中，则返回一个 Promise。请注意 Vue 不自带 Promise 的 polyfill，
+                    所以如果你的目标浏览器不是原生支持 Promise (IE：你们都看我干嘛)，你得自行 polyfill。
+            </li>
+            <li>
+                示例：
+                    new Vue({
+                        // ...
+                        methods: {
+                            // ...
+                            example: function () {
+                                // 修改数据
+                                this.message = 'changed'
+                                // DOM 还没有更新
+                                this.$nextTick(function () {
+                                // DOM 现在更新了
+                                // `this` 绑定到当前实例
+                                this.doSomethingElse()
+                                })
+                            }
+                        }
+                    })
+            </li>
+        </ul>
+
+        <p>#vm.$destroy()</p>
+        <ul>
+            <li>
+                用法：
+                    完全销毁一个实例。清理它与其它实例的连接，解绑它的全部指令及事件监听器。
+                    触发 beforeDestroy 和 destroyed 的钩子。
+            </li>
+            <li class="color-purple">
+                在大多数场景中你不应该调用这个方法。最好使用 v-if 和 v-for 指令以数据驱动的方式控制子组件的生命周期。
+            </li>
+        </ul>
+    </div>
+
+    <h2 class="text-title">指令</h2>
+    <div class="content-box">
+        <p>#v-text</p>
+        <ul>
+            <li>
+                预期:string
+            </li>
+            <li>
+                详细：
+                    更新元素的textContent.如果要更新部分的 textContent ，需要使用 {{ Mustache }} 插值。
+            </li>
+            <li>
+                示例：
+                    <span v-text="msg"></span>
+                    <!-- 和下面的一样 -->
+                    <span>{{msg}}</span>
+            </li>
+        </ul>
+
+        <p>#v-html</p>
+        <ul>
+            <li>
+                预期:string
+            </li>
+            <li>
+                详细：
+                    更新元素的 innerHTML 。注意：内容按普通 HTML 插入 - 不会作为 Vue 模板进行编译 。
+                    如果试图使用 v-html 组合模板，可以重新考虑是否通过使用组件来替代。
+            </li>
+            <li class="color-purple">
+                    在网站上动态渲染任意 HTML 是非常危险的，因为容易导致 XSS 攻击。只在可信内容上使用 v-html，永不用在用户提交的内容上。
+                    
+                    在单文件组件里，scoped 的样式不会应用在 v-html 内部，因为那部分 HTML 没有被 Vue 的模板编译器处理。如果你希望针对 v-html 的内容设置带作用域的 CSS，
+                    你可以替换为 CSS Modules 或用一个额外的全局 [style] 元素手动设置类似 BEM 的作用域策略。
+            </li>
+            <li>
+                <div v-html="html"></div>
+            </li>
+        </ul>
+        
+        <p>#v-show</p>
+        <ul>
+            <li>
+                预期: any
+            </li>
+            <li>
+                用法:
+                    根据表达式之真假值，切换元素的 display CSS 属性。
+
+                    当条件变化时该指令触发过渡效果。
+            </li>
+            <li class="color-purple">
+                    当和 v-if 一起使用时，v-for 的优先级比 v-if 更高。详见列表渲染教程
+            </li>
+        </ul>
+        
+        <p>#v-if</p>
+        <ul>
+            <li>
+                预期: any
+            </li>
+            <li>
+                用法:
+                    根据表达式的值的真假条件渲染元素。在切换时元素及它的数据绑定 / 组件被销毁并重建。如果元素是 [template] ，将提出它的内容作为条件块。
+                    当条件变化时该指令触发过渡效果。
+            </li>
+        </ul>
+        
+        <p>#v-else</p>
+        <ul>
+            <li>不需要表达式</li>
+            <li>
+                限制: 前一兄弟元素必须有 v-if 或 v-else-if。
+            </li>
+            <li>
+                用法:
+                    为 v-if 或者 v-else-if 添加“else 块”。
+
+                    <div v-if="Math.random() > 0.5">
+                        Now you see me
+                    </div>
+                    <div v-else>
+                        Now you don't
+                    </div>
+            </li>
+        </ul>
+
+    </div>
 
 
     <script type="text/javascript" charset="utf-8">
